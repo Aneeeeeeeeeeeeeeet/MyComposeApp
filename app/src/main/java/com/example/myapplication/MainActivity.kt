@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
@@ -15,7 +17,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.ui.theme.MyApplicationTheme
@@ -38,8 +39,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MyApplicationApp() {
 
-
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.SCREEN_A) }
+    var currentDestination by rememberSaveable {
+        mutableStateOf(AppDestinations.SCREEN_A)
+    }
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -70,6 +72,8 @@ enum class AppDestinations(
     SCREEN_B("Screen B", Icons.Default.Favorite)
 }
 
+
+
 @Composable
 fun ScreenA(modifier: Modifier = Modifier) {
 
@@ -86,11 +90,10 @@ fun ScreenA(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(12.dp)
         )
 
-        Divider()
-
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(12.dp)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp)
         ) {
             when (currentSubScreen) {
                 SubScreen.FIRST -> SubScreen1(
@@ -111,7 +114,9 @@ enum class SubScreen { FIRST, SECOND }
 @Composable
 fun SubScreen1(modifier: Modifier = Modifier, onNavigateToSecond: () -> Unit) {
 
-    var labelText by rememberSaveable { mutableStateOf("Начальный текст (Подэкран1)") }
+    var labelText by rememberSaveable {
+        mutableStateOf("Начальный текст (Подэкран1)")
+    }
 
     Column(
         modifier = modifier
@@ -156,12 +161,10 @@ fun SubScreen2(modifier: Modifier = Modifier, onNavigateBack: () -> Unit) {
 
         Text(
             text = "Какая-то информация",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(horizontal = 12.dp)
+            style = MaterialTheme.typography.bodyMedium
         )
 
         Spacer(modifier = Modifier.height(24.dp))
-
 
         Button(onClick = onNavigateBack) {
             Text("Назад к Подэкран1")
@@ -169,23 +172,91 @@ fun SubScreen2(modifier: Modifier = Modifier, onNavigateBack: () -> Unit) {
     }
 }
 
+
+
+data class User(
+    val id: Int,
+    val name: String
+)
+
+data class Message(
+    val id: Int,
+    val text: String
+)
+
+
+
 @Composable
-fun ScreenB(modifier: Modifier = Modifier) {
-
-    var labelText by rememberSaveable { mutableStateOf("Текст на экране B") }
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(40.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.Start
+fun UserWithMessageItem(
+    user: User,
+    message: Message?
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
     ) {
-        Text(text = labelText, style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(30.dp))
-        Button(onClick = { labelText = "Изменено на экране B!" }) {
-            Text("Обновить метку")
+        Column(modifier = Modifier.padding(16.dp)) {
+
+            Text(
+                text = "Пользователь: ${user.name}",
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            if (message != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "СМС: ${message.text}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }
 
+
+
+@Composable
+fun ScreenB(modifier: Modifier = Modifier) {
+
+    val users = listOf(
+        User(1, "User1"),
+        User(2, "User2"),
+        User(2, "User2"),
+        User(2, "User2"),
+        User(2, "User2"),
+        User(2, "User2"),
+        User(2, "User2"),
+        User(2, "User2"),
+        User(3, "User3")
+    )
+
+    val messages = listOf(
+        Message(1, "Сообщение 1"),
+        Message(2, "Сообщение 2"),
+        Message(3, "Сообщение 3")
+    )
+
+    Column(modifier = modifier.fillMaxSize()) {
+
+        Text(
+            text = "Экран B — пользователи и сообщения",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(16.dp)
+        )
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(users) { user ->
+                val matchedMessage = messages.find { it.id == user.id }
+
+                UserWithMessageItem(
+                    user = user,
+                    message = matchedMessage
+                )
+            }
+        }
+    }
+}
